@@ -1,0 +1,28 @@
+fetch("https://pastebin.com/", {
+  "headers": {
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "accept-language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7,ar;q=0.6",
+    "cache-control": "max-age=0",
+    "content-type": "multipart/form-data; boundary=----WebKitFormBoundaryb63Lfb9aJ6uZHiI8",
+    "priority": "u=0, i",
+    "sec-ch-ua": "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+    "sec-ch-ua-arch": "\"x86\"",
+    "sec-ch-ua-bitness": "\"64\"",
+    "sec-ch-ua-full-version": "\"148.0.7778.178\"",
+    "sec-ch-ua-full-version-list": "\"Chromium\";v=\"148.0.7778.178\", \"Google Chrome\";v=\"148.0.7778.178\", \"Not/A)Brand\";v=\"99.0.0.0\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-model": "\"\"",
+    "sec-ch-ua-platform": "\"Linux\"",
+    "sec-ch-ua-platform-version": "\"\"",
+    "sec-fetch-dest": "document",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "same-origin",
+    "sec-fetch-user": "?1",
+    "upgrade-insecure-requests": "1"
+  },
+  "referrer": "https://pastebin.com/",
+  "body": "------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"_csrf-frontend\"\r\n\r\neayD1jehSaBP8nQPn5oghpZzoW-uoJYQ7Zgot3CQOxEW5uWZW_ZxyACIDXzvo2nPrwfvLPvy2VWF9nvhKuANZA==\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"PostForm[text]\"\r\n\r\nexample\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"PostForm[category_id]\"\r\n\r\n0\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"PostForm[tag]\"\r\n\r\n\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"PostForm[format]\"\r\n\r\n1\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"PostForm[expiration]\"\r\n\r\nN\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"PostForm[status]\"\r\n\r\n0\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"PostForm[is_password_enabled]\"\r\n\r\n0\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"PostForm[is_burn]\"\r\n\r\n0\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8\r\nContent-Disposition: form-data; name=\"PostForm[name]\"\r\n\r\n\r\n------WebKitFormBoundaryb63Lfb9aJ6uZHiI8--\r\n",
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+});
