@@ -10,3 +10,19 @@ export function generateShortId() {
     }
     return result;
 }
+
+/**
+ * Generates an 8-character Base62 string that is guaranteed unique within the provided store.
+ * @param {Object} storage - The pasteStorage object reference
+ */
+export function generateUniqueId(storage) {
+    let uniqueId = generateRawId();
+
+    // Loop executes if a matching key is found, ensuring 100% collision resistance
+    while (storage.hasOwnProperty(uniqueId)) {
+        console.warn(`Collision detected for ID: ${uniqueId}. Regenerating...`);
+        uniqueId = generateRawId();
+    }
+
+    return uniqueId;
+}

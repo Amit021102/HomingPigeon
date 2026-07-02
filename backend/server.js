@@ -1,21 +1,11 @@
 import express from 'express';
+import pasteStorage from './storage.js';
 import { generateShortId } from './ids.js';
 const app = express();
 const PORT = 3000;
-// 1. Load the Express module
-// const express = require('express');
-// const { generateShortId } = require('./ids');
 
-
-// 2. MIDDLEWARE: Teach our server how to read incoming data payloads
-// express.json() intercepts incoming requests with a 'Content-Type: application/json' header 
-// and automatically parses the body into a readable JavaScript object (req.body).
 app.use(express.json());
 
-// 3. IN-MEMORY STORAGE: A basic JS object to store our pastes temporarily while we are database-free
-const pasteStorage = {};
-
-// 4. THE POST ROUTE: Receives text content from the user and assigns a placeholder short string
 app.post('/api/pastes', (req, res) => {
     // Extract the 'content' field from the parsed request body
     const { content } = req.body;
@@ -39,7 +29,6 @@ app.post('/api/pastes', (req, res) => {
     res.status(201).json({ id: pasteId });
 });
 
-// 5. THE GET ROUTE: Looks up a paste by its specific ID parameter in the URL
 app.get('/api/pastes/:id', (req, res) => {
     // req.params.id extracts the ':id' variable directly out of the request URL string
     const requestedId = req.params.id;
@@ -56,7 +45,6 @@ app.get('/api/pastes/:id', (req, res) => {
     res.send(savedContent);
 });
 
-// 6. Ignition switch to boot up the server
 app.listen(PORT, () => {
     console.log(`HomingPigeon backend engine actively listening on http://localhost:${PORT}`);
 });
