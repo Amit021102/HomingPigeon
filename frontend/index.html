@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homing Pigeon - Create Paste</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background: #eef2f3; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        textarea { width: 100%; height: 300px; font-family: 'Courier New', Courier, monospace; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical; }
+        button { margin-top: 15px; padding: 12px 24px; font-size: 16px; background: #007BFF; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🐦 Homing Pigeon / New Paste</h2>
+        <textarea id="pasteContent" placeholder="Write or paste your text/code here..."></textarea>
+        <br>
+        <button id="submitBtn">Create New Paste</button>
+    </div>
+
+    <script type="module">
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const content = document.getElementById('pasteContent').value;
+            
+            if (!content.trim()) {
+                return alert("Paste content cannot be empty!");
+            }
+
+            const response = await fetch('/api/pastes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Redirect the user to the newly generated short URL path
+                window.location.href = `/${data.id}`;
+            } else {
+                alert("Failed to create paste.");
+            }
+        });
+    </script>
+</body>
+</html>

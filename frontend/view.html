@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homing Pigeon - View Paste</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background: #eef2f3; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        pre { background: #f8f9fa; padding: 20px; border: 1px solid #e2e8f0; border-radius: 4px; font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; word-break: break-all; }
+        a { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #007BFF; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/">&larr; Create Another Paste</a>
+        <h2>🐦 Homing Pigeon / View Paste</h2>
+        <pre id="output">Loading content from memory...</pre>
+    </div>
+
+    <script type="module">
+        // Grab the exact short ID right out of the browser's current URL path
+        const shortId = window.location.pathname.substring(1);
+
+        async function loadPaste() {
+            const response = await fetch(`/api/pastes/${shortId}`);
+            const outputElement = document.getElementById('output');
+
+            if (response.ok) {
+                const text = await response.text();
+                outputElement.textContent = text;
+            } else {
+                outputElement.textContent = "❌ 404 - This pigeon carried no message! (Paste Not Found)";
+                outputElement.style.color = "#dc3545";
+            }
+        }
+
+        loadPaste();
+    </script>
+</body>
+</html>

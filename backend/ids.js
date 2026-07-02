@@ -16,12 +16,12 @@ export function generateShortId() {
  * @param {Object} storage - The pasteStorage object reference
  */
 export function generateUniqueId(storage) {
-    let uniqueId = generateRawId();
+    let uniqueId = generateShortId();
 
     // Loop executes if a matching key is found, ensuring 100% collision resistance
     while (storage.hasOwnProperty(uniqueId)) {
-        console.warn(`Collision detected for ID: ${uniqueId}. Regenerating...`);
-        uniqueId = generateRawId();
+        // console.warn(`Collision detected for ID: ${uniqueId}. Regenerating...`);
+        uniqueId = generateShortId();
     }
 
     return uniqueId;
