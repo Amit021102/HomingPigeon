@@ -13,30 +13,91 @@ const __dirname = path.dirname(__filename);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+// --- BACKGROUND GARBAGE COLLECTOR SERVICE ---
+// Sweeps memory every 60 seconds to clear expired pastes before they clog RAM
+setInterval(() => {
+    const now = Date.now();
+    let purgeCount = 0;
+
+    for (const id in pasteStorage) {
+        const paste = pasteStorage[id];
+        if (paste.expiresAt && now > paste.expiresAt) {
+            delete pasteStorage[id];
+            purgeCount++;
+        }
+    }
+    if (purgeCount > 0) {
+        console.log(`[GC Service] Sweeper cleaned up ${purgeCount} expired pastes.`);
+    }
+}, 60000);
+
+
+
 app.post('/api/pastes', (req, res) => {
-    const { content } = req.body;
+    const { title, category, content, syntax, expiration, isBurn } = req.body;
 
     if (!content) {
         return res.status(400).json({ error: "Content field is required." });
     }
 
-    const pasteId = generateUniqueId(pasteStorage);
-    pasteStorage[pasteId] = content;
+    const uniqueId = generateUniqueId(pasteStorage);
+    const now = Date.now();
+    let expiresAt = null;
 
-    console.log(`Saved new paste under ID: ${pasteId}`);
+    // Calculate future unix timestamp based on selection
+    if (!isBurn && expiration && expiration !== 'never') {
+        const durationMap = {
+            '1m': 60 * 1000,                // 1 minute
+            '1h': 60 * 60 * 1000,           // 1 hour
+            '1d': 24 * 60 * 60 * 1000,      // 1 day
+            '1w': 7 * 24 * 60 * 60 * 1000,  // 1 week
+            '1M': 30 * 24 * 60 * 60 * 1000, // 1 month (approximate)
+            '1y': 365 * 24 * 60 * 60 * 1000 // 1 year (approximate)
+        };
+        if (durationMap[expiration]) {
+            expiresAt = now + durationMap[expiration];
+        }
+    }
 
-    res.status(201).json({ id: pasteId });
+    // Save metadata package
+    pasteStorage[uniqueId] = {
+        title: title || "Untitled Paste",
+        category: category || "General",
+        content,
+        syntax: syntax || "plaintext",
+        isBurn: !!isBurn,
+        createdAt: now,
+        expiresAt
+    };
+
+    console.log(`Created Paste [${uniqueId}] - Burn Mode: ${!!isBurn}, Expires: ${expiresAt ? new Date(expiresAt).toISOString() : 'Never'}`);
+    res.status(201).json({ id: uniqueId });
 });
 
 app.get('/api/pastes/:id', (req, res) => {
     const requestedId = req.params.id;
-    const savedContent = pasteStorage[requestedId];
+    const paste = pasteStorage[requestedId];
 
-    if (!savedContent) {
+    if (!paste) {
         return res.status(404).json({ error: "Paste not found." });
     }
 
-    res.send(savedContent);
+    // Active Expiration Check (On-Call protection)
+    if (paste.expiresAt && Date.now() > paste.expiresAt) {
+        delete pasteStorage[requestedId]; // Cleanup immediately
+        return res.status(404).json({ error: "Paste has expired." });
+    }
+
+    // Clone the metadata payload before modifying storage state
+    const payload = { ...paste };
+
+    // Burn After Read Trigger
+    if (paste.isBurn) {
+        console.log(`[Burn-On-Read] Paste [${requestedId}] consumed. Deleting metadata package...`);
+        delete pasteStorage[requestedId]; // Wiped from server memory permanently
+    }
+
+    res.json(payload);
 });
 
 app.get('/:id', (req, res, next) => {

@@ -2,36 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Homing Pigeon - View Paste</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background: #eef2f3; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        pre { background: #f8f9fa; padding: 20px; border: 1px solid #e2e8f0; border-radius: 4px; font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; word-break: break-all; }
-        a { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #007BFF; font-weight: bold; }
-        a:hover { text-decoration: underline; }
-    </style>
+    <title>HomingPigeon - View Paste</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
 </head>
 <body>
     <div class="container">
-        <a href="/">&larr; Create Another Paste</a>
-        <h2>🐦 Homing Pigeon / View Paste</h2>
+        <div class="meta-header">
+            <a href="/" class="back-btn">
+                <span>🏠</span>
+                <span>New Paste</span>
+            </a>
+            <span id="metaBadge" class="badge">General</span>
+        </div>
+        
+        <h2 id="displayTitle" style="margin-top: 0; margin-bottom: 5px;">🐦 Loading...</h2>
+        <div class="highlighted">
+            <input type="checkbox" id="toggleHighlight" checked>
+            <label for="toggleHighlight">Enable Syntax Highlighting</label>
+        </div>
+        <div class="warning" id="burnWarning">
+            🔥 Warning: This is a Burn-After-Read paste. If you refresh or navigate away, it's gone forever!
+        </div>
+        
         <pre id="output">Loading content from memory...</pre>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
     <script type="module">
-        // Grab the exact short ID right out of the browser's current URL path
         const shortId = window.location.pathname.substring(1);
+        const highlightToggle = document.getElementById('toggleHighlight');
+        const outputElement = document.getElementById('output');
+        
+        let rawContentText = ""; 
+        let currentTargetSyntax = "plaintext";
+
+        // Toggle engine handler
+        highlightToggle.addEventListener('change', () => {
+            if (highlightToggle.checked) {
+                outputElement.className = `language-${currentTargetSyntax}`;
+                outputElement.textContent = rawContentText;
+                Prism.highlightElement(outputElement);
+            } else {
+                outputElement.className = "language-plaintext";
+                outputElement.textContent = rawContentText;
+                Prism.highlightElement(outputElement); // Forces display fallback to normal text format
+            }
+        });
 
         async function loadPaste() {
             const response = await fetch(`/api/pastes/${shortId}`);
             const outputElement = document.getElementById('output');
+            const titleElement = document.getElementById('displayTitle');
+            const badgeElement = document.getElementById('metaBadge');
+            const warningElement = document.getElementById('burnWarning');
 
             if (response.ok) {
-                const text = await response.text();
-                outputElement.textContent = text;
+                const paste = await response.json();
+                
+                // Mount structural labels dynamically from our memory store snapshot
+                titleElement.textContent = paste.title;
+                badgeElement.textContent = `Topic: ${paste.category}`;
+                outputElement.textContent = paste.content;
+                rawContentText = paste.content;
+                currentTargetSyntax = paste.syntax;
+                
+                // Expose warning flag strictly if property evaluates to true
+                if (paste.isBurn) {
+                    warningElement.style.display = "block";
+                }
+
+                // Initial render execution (toggled on by default configuration)
+                outputElement.className = `language-${currentTargetSyntax}`;
+                outputElement.textContent = rawContentText;
+                Prism.highlightElement(outputElement);
             } else {
-                outputElement.textContent = "❌ 404 - This pigeon carried no message! (Paste Not Found)";
+                titleElement.textContent = "Error";
+                outputElement.textContent = "❌ 404 - This pigeon carried no message! (Paste Not Found or Expired)";
                 outputElement.style.color = "#dc3545";
+                badgeElement.style.display = "none";
+                highlightToggle.parentElement.style.display = "none";
             }
         }
 

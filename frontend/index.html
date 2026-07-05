@@ -2,45 +2,165 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Homing Pigeon - Create Paste</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background: #eef2f3; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        textarea { width: 100%; height: 300px; font-family: 'Courier New', Courier, monospace; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical; }
-        button { margin-top: 15px; padding: 12px 24px; font-size: 16px; background: #007BFF; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #0056b3; }
-    </style>
+    <title>HomingPigeon - Create Paste</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
 </head>
 <body>
     <div class="container">
-        <h2>🐦 Homing Pigeon / New Paste</h2>
-        <textarea id="pasteContent" placeholder="Write or paste your text/code here..."></textarea>
+        <div class="meta-header">
+            <h2 style="margin: 0;">🐦 HomingPigeon</h2>
+            <span class="badge" style="background: #4F46E5;">Mode: Creator</span>
+        </div>
+        
+        <!-- Row for Title -->
+        <div class="form-row">
+            <input type="text" id="pasteTitle" class="input-field" placeholder="Paste Title (Optional)">
+        </div>
+
+        <!-- Row for Option Selectors -->
+        <div class="form-row">
+            <select id="pasteCategory" class="select-field">
+                <option value="General">General</option>
+                <option value="Code"> Code</option>
+                <option value="Recipes">Recipes</option>
+                <option value="Notes">Notes</option>
+            </select>
+
+            <select id="pasteSyntax" class="select-field">
+                <option value="plaintext">Plain Text (None)</option>
+                <option value="c">C</option>
+                <option value="cpp">C++</option>
+                <option value="csharp">C#</option>
+                <option value="python">Python</option>
+                <option value="java">Java</option>
+                <option value="javascript">JavaScript</option>
+                <option value="json">JSON</option>
+            </select>
+
+            <select id="pasteExpiration" class="select-field">
+                <option value="never">Never</option>
+                <option value="1m">1 Minute</option>
+                <option value="1h">1 Hour</option>
+                <option value="1d">1 Day</option>
+                <option value="1w">1 Week</option>
+                <option value="1M">1 Month</option>
+                <option value="1y">1 Year</option>
+                <option value="burn">Burn After Read 🔥</option>
+            </select>
+        </div>
+
+        <div class="highlighted">
+            <input type="checkbox" id="toggleHighlight" id="highlightCheckbox">
+            <label for="toggleHighlight">Enable Live Syntax Highlighting Preview</label>
+        </div>
+
+        <div class="editor-wrapper">
+            <textarea id="pasteContent" class="mirror-textarea" placeholder="Write or paste your text/code here..."></textarea>
+            <pre id="highlightContainer" class="mirror-highlight"><code id="highlightCode" class="language-plaintext"></code></pre>
+        </div>
+
         <br>
         <button id="submitBtn">Create New Paste</button>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
     <script type="module">
-        document.getElementById('submitBtn').addEventListener('click', async () => {
-            const content = document.getElementById('pasteContent').value;
+        const contentArea = document.getElementById('pasteContent');
+        const syntaxSelect = document.getElementById('pasteSyntax');
+        const highlightToggle = document.getElementById('toggleHighlight');
+        const highlightContainer = document.getElementById('highlightContainer');
+        const highlightCode = document.getElementById('highlightCode');
+
+        // Dynamic highlight renderer function using the layered mirror principle
+        // function syncCodeHighlight() {
+        //     const textValue = contentArea.value;
             
-            if (!content.trim()) {
-                return alert("Paste content cannot be empty!");
+        //     if (highlightToggle.checked) {
+        //         contentArea.style.color = "transparent";
+        //         highlightCode.className = `language-${syntaxSelect.value}`;
+        //         highlightCode.textContent = textValue;
+        //         Prism.highlightElement(highlightCode);
+        //     } else {
+        //         contentArea.style.color = "#333";
+        //         highlightCode.className = "language-plaintext";
+        //         highlightCode.textContent = "";
+        //     }
+        // }
+
+        function syncCodeHighlight() {
+            const textValue = contentArea.value;
+            
+            // Add a trailing newline so the layout mirror layer handles trailing line breaks correctly
+            const formattedText = textValue.endsWith('\n') ? textValue + ' ' : textValue;
+            
+            if (highlightToggle.checked) {
+                // Only hide the text layer if there is actually text to show underneath
+                if (textValue.length > 0) {
+                    contentArea.style.color = "transparent";
+                } else {
+                    contentArea.style.color = "#333";
+                }
+                highlightCode.className = `language-${syntaxSelect.value}`;
+                highlightCode.textContent = formattedText;
+            } else {
+                // Fallback: make the text dark and empty out the duplicate background stream
+                contentArea.style.color = "#333";
+                highlightCode.className = "language-plaintext";
+                highlightCode.textContent = "";
             }
+            Prism.highlightElement(highlightCode);
+        }
+
+        // Attach listeners to trigger update instantly on any workspace event
+        contentArea.addEventListener('input', syncCodeHighlight);
+        syntaxSelect.addEventListener('change', syncCodeHighlight);
+        highlightToggle.addEventListener('change', syncCodeHighlight);
+
+        contentArea.addEventListener('scroll', () => {
+            highlightContainer.scrollTop = contentArea.scrollTop;
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const content = contentArea.value;
+            const title = document.getElementById('pasteTitle').value;
+            const category = document.getElementById('pasteCategory').value;
+            const syntax = syntaxSelect.value;
+            const expirationValue = document.getElementById('pasteExpiration').value;
+
+            if (!content.trim()) return alert("Paste content cannot be empty!");
+
+            const payload = {
+                title: title.trim() || "Untitled Paste",
+                category,
+                content,
+                syntax,
+                expiration: expirationValue === 'burn' ? 'never' : expirationValue,
+                isBurn: expirationValue === 'burn'
+            };
 
             const response = await fetch('/api/pastes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content })
+                body: JSON.stringify(payload)
             });
 
             if (response.ok) {
                 const data = await response.json();
-                // Redirect the user to the newly generated short URL path
                 window.location.href = `/${data.id}`;
             } else {
                 alert("Failed to create paste.");
             }
         });
+
+        syncCodeHighlight();
     </script>
 </body>
 </html>
