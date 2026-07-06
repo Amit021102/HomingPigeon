@@ -152,7 +152,6 @@ a:hover {
     line-height: 20px !important;
     white-space: pre-wrap !important;
     word-break: break-all !important;
-    overflow-y: auto !important;
     background: transparent !important;
     border: none !important;
 }
@@ -163,6 +162,7 @@ a:hover {
     resize: none;
     outline: none !important;
     z-index: 2;
+    overflow-y: auto !important;
 }
 
 .mirror-highlight {
@@ -170,6 +170,7 @@ a:hover {
     pointer-events: none;
     overflow: hidden !important;
 }
+
 
 .back-btn {
     display: inline-flex;

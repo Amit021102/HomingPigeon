@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>HomingPigeon - Create Paste</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
 </head>
 <body>
@@ -110,6 +110,7 @@
                 }
                 highlightCode.className = `language-${syntaxSelect.value}`;
                 highlightCode.textContent = formattedText;
+                highlightContainer.scrollTop = contentArea.scrollTop;
             } else {
                 // Fallback: make the text dark and empty out the duplicate background stream
                 contentArea.style.color = "#333";
@@ -127,6 +128,10 @@
         contentArea.addEventListener('scroll', () => {
             highlightContainer.scrollTop = contentArea.scrollTop;
         });
+
+        // highlightContainer.addEventListener('scroll', () => {
+        //     contentArea.scrollTop = highlightContainer.scrollTop;
+        // });
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
             const content = contentArea.value;
