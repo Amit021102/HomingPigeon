@@ -10,15 +10,12 @@
     <div class="container">
         <div class="meta-header">
             <h2 style="margin: 0;">🐦 HomingPigeon</h2>
-            <span class="badge" style="background: #4F46E5;">Mode: Creator</span>
         </div>
         
-        <!-- Row for Title -->
         <div class="form-row">
             <input type="text" id="pasteTitle" class="input-field" placeholder="Paste Title (Optional)">
         </div>
 
-        <!-- Row for Option Selectors -->
         <div class="form-row">
             <select id="pasteCategory" class="select-field">
                 <option value="General">General</option>
@@ -79,22 +76,6 @@
         const highlightContainer = document.getElementById('highlightContainer');
         const highlightCode = document.getElementById('highlightCode');
 
-        // Dynamic highlight renderer function using the layered mirror principle
-        // function syncCodeHighlight() {
-        //     const textValue = contentArea.value;
-            
-        //     if (highlightToggle.checked) {
-        //         contentArea.style.color = "transparent";
-        //         highlightCode.className = `language-${syntaxSelect.value}`;
-        //         highlightCode.textContent = textValue;
-        //         Prism.highlightElement(highlightCode);
-        //     } else {
-        //         contentArea.style.color = "#333";
-        //         highlightCode.className = "language-plaintext";
-        //         highlightCode.textContent = "";
-        //     }
-        // }
-
         function syncCodeHighlight() {
             const textValue = contentArea.value;
             
@@ -120,7 +101,7 @@
             Prism.highlightElement(highlightCode);
         }
 
-        // Attach listeners to trigger update instantly on any workspace event
+        // Listeners to trigger update instantly on any workspace event
         contentArea.addEventListener('input', syncCodeHighlight);
         syntaxSelect.addEventListener('change', syncCodeHighlight);
         highlightToggle.addEventListener('change', syncCodeHighlight);
@@ -128,10 +109,6 @@
         contentArea.addEventListener('scroll', () => {
             highlightContainer.scrollTop = contentArea.scrollTop;
         });
-
-        // highlightContainer.addEventListener('scroll', () => {
-        //     contentArea.scrollTop = highlightContainer.scrollTop;
-        // });
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
             const content = contentArea.value;
