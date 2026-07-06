@@ -107,6 +107,12 @@ app.get('/:id', (req, res, next) => {
     if (req.params.id.startsWith('api') || !req.params.id.match(/^[a-zA-Z0-9]+$/)) {
         return next();
     }
+    const paste = pasteStorage.get(req.params.id);
+    // If the paste is set to burn, and they haven't added '?confirmed=true' to their URL
+    if (paste && paste.isBurn && req.query.confirmed !== 'true') {
+        return res.sendFile(path.join(__dirname, '../frontend', 'warning.html'));
+    }
+
     // Otherwise, send our paste viewer page
     res.sendFile(path.join(__dirname, '../frontend', 'view.html'));
 });

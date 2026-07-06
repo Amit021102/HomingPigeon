@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HomingPigeon - WARNING</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="warning-page" id="burnWarning">
+            <p>
+                🔥 Once accessed, you can no longer view this paste, it will be <b>permanently removed</b>.
+                If you need access to this information again please copy the data to a secure location.
+            </p>
+            <button class="burnBtn" id="proceed">Show me the paste</button>
+            <button class="burnBtn" id="return">Return to home</button>
+        </div>
+    </div>
+
+    <script type="module">
+        document.getElementById('proceed').addEventListener('click', async () => {
+            const shortId = window.location.pathname.substring(1);
+            window.location.href = `/${shortId}?confirmed=true`;
+        });
+
+        document.getElementById('return').addEventListener('click', () => {
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>
