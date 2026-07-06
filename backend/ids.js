@@ -19,8 +19,7 @@ export function generateUniqueId(storage) {
     let uniqueId = generateShortId();
 
     // Loop executes if a matching key is found, ensuring 100% collision resistance
-    while (storage.hasOwnProperty(uniqueId)) {
-        // console.warn(`Collision detected for ID: ${uniqueId}. Regenerating...`);
+    while (storage.get(uniqueId)) {
         uniqueId = generateShortId();
     }
 

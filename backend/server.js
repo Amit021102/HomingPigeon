@@ -19,13 +19,15 @@ setInterval(() => {
     const now = Date.now();
     let purgeCount = 0;
 
-    for (const id in pasteStorage) {
-        const paste = pasteStorage[id];
+    const allPastes = pasteStorage.getAll();
+
+    for (const paste of allPastes) {
         if (paste.expiresAt && now > paste.expiresAt) {
-            delete pasteStorage[id];
+            pasteStorage.delete(paste.id);
             purgeCount++;
         }
     }
+
     if (purgeCount > 0) {
         console.log(`[GC Service] Sweeper cleaned up ${purgeCount} expired pastes.`);
     }
@@ -51,8 +53,8 @@ app.post('/api/pastes', (req, res) => {
             '1h': 60 * 60 * 1000,           // 1 hour
             '1d': 24 * 60 * 60 * 1000,      // 1 day
             '1w': 7 * 24 * 60 * 60 * 1000,  // 1 week
-            '1M': 30 * 24 * 60 * 60 * 1000, // 1 month (approximate)
-            '1y': 365 * 24 * 60 * 60 * 1000 // 1 year (approximate)
+            '1M': 30 * 24 * 60 * 60 * 1000, // 1 month
+            '1y': 365 * 24 * 60 * 60 * 1000 // 1 year
         };
         if (durationMap[expiration]) {
             expiresAt = now + durationMap[expiration];
@@ -60,7 +62,7 @@ app.post('/api/pastes', (req, res) => {
     }
 
     // Save metadata package
-    pasteStorage[uniqueId] = {
+    pasteStorage.set(uniqueId, {
         title: title || "Untitled Paste",
         category: category || "General",
         content,
@@ -68,7 +70,7 @@ app.post('/api/pastes', (req, res) => {
         isBurn: !!isBurn,
         createdAt: now,
         expiresAt
-    };
+    });
 
     console.log(`Created Paste [${uniqueId}] - Burn Mode: ${!!isBurn}, Expires: ${expiresAt ? new Date(expiresAt).toISOString() : 'Never'}`);
     res.status(201).json({ id: uniqueId });
@@ -76,7 +78,7 @@ app.post('/api/pastes', (req, res) => {
 
 app.get('/api/pastes/:id', (req, res) => {
     const requestedId = req.params.id;
-    const paste = pasteStorage[requestedId];
+    const paste = pasteStorage.get(requestedId);
 
     if (!paste) {
         return res.status(404).json({ error: "Paste not found." });
@@ -84,7 +86,7 @@ app.get('/api/pastes/:id', (req, res) => {
 
     // Active Expiration Check (On-Call protection)
     if (paste.expiresAt && Date.now() > paste.expiresAt) {
-        delete pasteStorage[requestedId]; // Cleanup immediately
+        pasteStorage.delete(requestedId); // Clean up expired paste immediately
         return res.status(404).json({ error: "Paste has expired." });
     }
 
@@ -94,7 +96,7 @@ app.get('/api/pastes/:id', (req, res) => {
     // Burn After Read Trigger
     if (paste.isBurn) {
         console.log(`[Burn-On-Read] Paste [${requestedId}] consumed. Deleting metadata package...`);
-        delete pasteStorage[requestedId]; // Wiped from server memory permanently
+        pasteStorage.delete(requestedId); // Wiped from server memory permanently
     }
 
     res.json(payload);
