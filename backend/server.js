@@ -6,7 +6,7 @@ import pasteStorage from './storage.js';
 import { generateUniqueId } from './ids.js';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -118,5 +118,8 @@ app.get('/:id', (req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`HomingPigeon backend engine actively listening on http://localhost:${PORT}`);
+    console.log(`\n==================================================`);
+    console.log(`  🐦 HomingPigeon is flying high and ready!`);
+    console.log(`  🚀 Local Application URL: http://localhost:${PORT}`);
+    console.log(`==================================================\n`);
 });
