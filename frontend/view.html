@@ -17,9 +17,9 @@
         </div>
         
         <h2 id="displayTitle" style="margin-top: 0; margin-bottom: 5px;">🐦 Loading...</h2>
-        <div class="highlighted">
+        <div id="highlightControl" class="highlighted">
             <input type="checkbox" id="toggleHighlight" checked>
-            <label for="toggleHighlight">Enable Syntax Highlighting</label>
+            <label for="toggleHighlight" id="highlightLabel">Enable Syntax Highlighting</label>
         </div>
         <div class="warning" id="burnWarning">
             🔥 Warning: This is a Burn-After-Read paste. If you refresh or navigate away, it's gone forever!
@@ -39,23 +39,32 @@
     <script type="module">
         const shortId = window.location.pathname.substring(1);
         const highlightToggle = document.getElementById('toggleHighlight');
+        const highlightControl = document.getElementById('highlightControl');
+        const highlightLabel = document.getElementById('highlightLabel');
         const outputElement = document.getElementById('output');
         
         let rawContentText = ""; 
         let currentTargetSyntax = "plaintext";
 
-        // Toggle engine handler
-        highlightToggle.addEventListener('change', () => {
+        function renderContent() {
+            if (currentTargetSyntax === 'plaintext') {
+                outputElement.className = 'language-plaintext';
+                outputElement.textContent = rawContentText;
+                return;
+            }
+
             if (highlightToggle.checked) {
                 outputElement.className = `language-${currentTargetSyntax}`;
                 outputElement.textContent = rawContentText;
                 Prism.highlightElement(outputElement);
             } else {
-                outputElement.className = "language-plaintext";
+                outputElement.className = 'language-plaintext';
                 outputElement.textContent = rawContentText;
-                Prism.highlightElement(outputElement); // Forces display fallback to normal text format
             }
-        });
+        }
+
+        // Toggle engine handler
+        highlightToggle.addEventListener('change', renderContent);
 
         async function loadPaste() {
             const response = await fetch(`/api/pastes/${shortId}`);
@@ -72,23 +81,30 @@
                 badgeElement.textContent = `Topic: ${paste.category}`;
                 outputElement.textContent = paste.content;
                 rawContentText = paste.content;
-                currentTargetSyntax = paste.syntax;
+                currentTargetSyntax = paste.syntax || 'plaintext';
                 
                 // Expose warning flag strictly if property evaluates to true
                 if (paste.isBurn) {
                     warningElement.style.display = "block";
                 }
 
+                if (currentTargetSyntax === 'plaintext') {
+                    highlightControl.style.display = 'none';
+                    highlightToggle.checked = false;
+                } else {
+                    highlightControl.style.display = 'block';
+                    highlightLabel.textContent = `${currentTargetSyntax} highlighting`;
+                    highlightToggle.checked = true;
+                }
+
                 // Initial render execution (toggled on by default configuration)
-                outputElement.className = `language-${currentTargetSyntax}`;
-                outputElement.textContent = rawContentText;
-                Prism.highlightElement(outputElement);
+                renderContent();
             } else {
                 titleElement.textContent = "Error";
                 outputElement.textContent = "❌ 404 - This pigeon carried no message! (Paste Not Found or Expired)";
                 outputElement.style.color = "#dc3545";
                 badgeElement.style.display = "none";
-                highlightToggle.parentElement.style.display = "none";
+                highlightControl.style.display = "none";
             }
         }
 
