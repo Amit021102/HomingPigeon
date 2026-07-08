@@ -117,9 +117,28 @@ app.get('/:id', (req, res, next) => {
     res.sendFile(path.join(__dirname, '../frontend', 'view.html'));
 });
 
+app.delete('/api/pastes/:id', (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        const pasteExists = pasteStorage.get(id);
+        
+        if (pasteExists) {
+            pasteStorage.delete(id);
+            return res.status(200).json({ message: 'Paste successfully removed' });
+        } else {
+            return res.status(404).json({ error: 'Paste not found' });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Database removal failed' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`\n==================================================`);
     console.log(`  🐦 HomingPigeon is flying high and ready!`);
     console.log(`  🚀 Local Application URL: http://localhost:${PORT}`);
     console.log(`==================================================\n`);
 });
+
+export default app;
